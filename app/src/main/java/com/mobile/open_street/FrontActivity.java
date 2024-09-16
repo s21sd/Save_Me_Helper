@@ -44,13 +44,12 @@ public class FrontActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECEIVE_SMS}, SMS_PERMISSION_REQUEST_CODE);
         }
 
-        // Handle incoming message if any
         handleIncomingMessage(getIntent());
 
         btnShowOnMap.setOnClickListener(view -> {
             Intent intent = new Intent(FrontActivity.this, MainActivity.class);
-            intent.putExtra("latitude", Double.parseDouble(latitude));  // Pass latitude as double
-            intent.putExtra("longitude", Double.parseDouble(longitude)); // Pass longitude as double
+            intent.putExtra("latitude", Double.parseDouble(latitude));
+            intent.putExtra("longitude", Double.parseDouble(longitude));
             startActivity(intent);
         });
         readmsg.setOnClickListener(view -> {
@@ -80,7 +79,7 @@ public class FrontActivity extends AppCompatActivity {
         // Query SMS inbox
         Uri inboxUri = Uri.parse("content://sms/inbox");
         String[] projection = new String[]{"address", "body", "date"};
-        String sortOrder = "date DESC";  // Sort messages by date in descending order
+        String sortOrder = "date DESC";
 
         try (Cursor cursor = getContentResolver().query(inboxUri, projection, null, null, sortOrder)) {
             if (cursor != null && cursor.moveToFirst()) {
@@ -97,17 +96,19 @@ public class FrontActivity extends AppCompatActivity {
                     String[] parts = messageBody.split(", ");
                     for (String part : parts) {
                         if (part.startsWith("lat: ")) {
-                            lat = part.substring(5);  // Extract latitude
+                            lat = part.substring(5);
                         } else if (part.startsWith("log: ")) {
-                            log = part.substring(5);  // Extract longitude
+                            log = part.substring(5);
                         }
                     }
 
-                    // If both latitude and longitude are found, update the UI
                     if (lat != null && log != null) {
                         latitude = lat;
                         longitude = log;
                         tvLatLong.setText("Latitude: " + latitude + ", Longitude: " + longitude);
+
+
+                        updateMapWithLocation(latitude, longitude);
                     } else {
                         tvLatLong.setText("Latitude or Longitude not found in the message.");
                     }
@@ -124,6 +125,21 @@ public class FrontActivity extends AppCompatActivity {
     }
 
 
+    private void updateMapWithLocation(String latitude, String longitude) {
+        double lat = Double.parseDouble(latitude);
+        double lng = Double.parseDouble(longitude);
+
+        Uri gmmIntentUri = Uri.parse("geo:" + lat + "," + lng + "?q=" + lat + "," + lng);
+        Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
+        mapIntent.setPackage("com.google.android.apps.maps");
+
+        if (mapIntent.resolveActivity(getPackageManager()) != null) {
+            startActivity(mapIntent);
+        } else {
+            Toast.makeText(this, "Google Maps not installed.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
@@ -139,9 +155,9 @@ public class FrontActivity extends AppCompatActivity {
                 String[] parts = message.split(", ");
                 for (String part : parts) {
                     if (part.startsWith("lat: ")) {
-                        latitude = part.substring(5); // Extract latitude value
+                        latitude = part.substring(5);
                     } else if (part.startsWith("log: ")) {
-                        longitude = part.substring(5); // Extract longitude value
+                        longitude = part.substring(5);
                     }
                 }
 
