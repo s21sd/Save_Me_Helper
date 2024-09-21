@@ -21,12 +21,14 @@ import androidx.core.content.ContextCompat;
 public class FrontActivity extends AppCompatActivity {
 
     private TextView tvLatLong;
-    private Button btnShowOnMap ,readmsg;
+    private Button btnShowOnMap, readmsg;
     private Button btnShowInMaps;
     private String latitude = "0.0";
     private String longitude = "0.0";
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 100;
     private static final int SMS_PERMISSION_REQUEST_CODE = 200;
     private static final int READ_SMS_PERMISSION_REQUEST_CODE = 201;
+
     @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,8 +39,16 @@ public class FrontActivity extends AppCompatActivity {
         tvLatLong = findViewById(R.id.tvLatLong);
         btnShowOnMap = findViewById(R.id.btnShowOnMap);
         btnShowInMaps = findViewById(R.id.showinmaps);
-        readmsg=findViewById(R.id.readmsg);
+        readmsg = findViewById(R.id.readmsg);
 
+        // Check for location permission
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
+        }
+
+        // Check for SMS permission
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECEIVE_SMS)
                 != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECEIVE_SMS}, SMS_PERMISSION_REQUEST_CODE);
@@ -52,6 +62,7 @@ public class FrontActivity extends AppCompatActivity {
             intent.putExtra("longitude", Double.parseDouble(longitude));
             startActivity(intent);
         });
+
         readmsg.setOnClickListener(view -> {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_SMS)
                     == PackageManager.PERMISSION_GRANTED) {
@@ -60,7 +71,6 @@ public class FrontActivity extends AppCompatActivity {
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_SMS}, READ_SMS_PERMISSION_REQUEST_CODE);
             }
         });
-
 
         btnShowInMaps.setOnClickListener(view -> {
             if (!latitude.equals("0.0") && !longitude.equals("0.0")) {
@@ -75,6 +85,7 @@ public class FrontActivity extends AppCompatActivity {
             }
         });
     }
+
     private void readLatestSms() {
         // Query SMS inbox
         Uri inboxUri = Uri.parse("content://sms/inbox");
@@ -106,8 +117,6 @@ public class FrontActivity extends AppCompatActivity {
                         latitude = lat;
                         longitude = log;
                         tvLatLong.setText("Latitude: " + latitude + ", Longitude: " + longitude);
-
-
                         updateMapWithLocation(latitude, longitude);
                     } else {
                         tvLatLong.setText("Latitude or Longitude not found in the message.");
@@ -124,7 +133,6 @@ public class FrontActivity extends AppCompatActivity {
         }
     }
 
-
     private void updateMapWithLocation(String latitude, String longitude) {
         double lat = Double.parseDouble(latitude);
         double lng = Double.parseDouble(longitude);
@@ -136,7 +144,7 @@ public class FrontActivity extends AppCompatActivity {
         if (mapIntent.resolveActivity(getPackageManager()) != null) {
             startActivity(mapIntent);
         } else {
-            Toast.makeText(this, "Google Maps not installed.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Location Permission is not given", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -169,7 +177,15 @@ public class FrontActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == SMS_PERMISSION_REQUEST_CODE) {
+        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Log.d("FrontActivity", "Location permission granted");
+                // Proceed with location-related tasks
+            } else {
+                Log.e("FrontActivity", "Location permission denied");
+                Toast.makeText(this, "Location permission is needed to show your location on map.", Toast.LENGTH_SHORT).show();
+            }
+        } else if (requestCode == SMS_PERMISSION_REQUEST_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 Log.d("FrontActivity", "SMS permission granted");
             } else {

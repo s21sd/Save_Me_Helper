@@ -122,12 +122,17 @@ public class MainActivity extends AppCompatActivity implements MapListener {
     @Override
     protected void onResume() {
         super.onResume();
-        mMap.onResume();
+        if (mMap != null) {
+            mMap.onResume(); // Ensure that mMap is not null
+        }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        mMap.onPause();
+        if (mMap != null) {
+            mMap.onPause(); // Ensure that mMap is not null
+        }
     }
+
 }
