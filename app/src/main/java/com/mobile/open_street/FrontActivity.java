@@ -41,14 +41,12 @@ public class FrontActivity extends AppCompatActivity {
         btnShowInMaps = findViewById(R.id.showinmaps);
         readmsg = findViewById(R.id.readmsg);
 
-        // Check for location permission
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
         }
 
-        // Check for SMS permission
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECEIVE_SMS)
                 != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECEIVE_SMS}, SMS_PERMISSION_REQUEST_CODE);
@@ -180,7 +178,7 @@ public class FrontActivity extends AppCompatActivity {
         if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 Log.d("FrontActivity", "Location permission granted");
-                // Proceed with location-related tasks
+
             } else {
                 Log.e("FrontActivity", "Location permission denied");
                 Toast.makeText(this, "Location permission is needed to show your location on map.", Toast.LENGTH_SHORT).show();

@@ -123,7 +123,7 @@ public class MainActivity extends AppCompatActivity implements MapListener {
     protected void onResume() {
         super.onResume();
         if (mMap != null) {
-            mMap.onResume(); // Ensure that mMap is not null
+            mMap.onResume();
         }
     }
 
@@ -131,7 +131,7 @@ public class MainActivity extends AppCompatActivity implements MapListener {
     protected void onPause() {
         super.onPause();
         if (mMap != null) {
-            mMap.onPause(); // Ensure that mMap is not null
+            mMap.onPause();
         }
     }
 
